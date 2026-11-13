@@ -1,0 +1,13 @@
+{
+  "id": "skin-tone-brush",
+  "name": "Skin Tone Brush",
+  "version": "1.0.0",
+  "description": "Paint over skin to even out blotchy tone and colour while pores and fine texture stay as they were: frequency separation under a brush, with Smoothing, Texture and their sizes.",
+  "author": "Anthony Reimche",
+  "main": "dist/index.js",
+  "license": "GPL-3.0-or-later",
+  "categories": ["Develop", "Detail"],
+  "keywords": ["skin", "skin smoothing", "retouch", "portrait", "frequency separation", "texture", "blemish", "brush", "mask"],
+  "repository": "anthonyreimche/Skin-Tone-Brush",
+  "minAppVersion": "3.2.3"
+}

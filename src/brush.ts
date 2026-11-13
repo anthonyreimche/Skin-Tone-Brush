@@ -1,0 +1,67 @@
+// Skin Tone Brush — a Safelight extension.
+// Copyright (C) 2026 Anthony Reimche. Licensed under the GNU GPL v3 or later;
+// see LICENSE.
+
+// The brush's pure stroke model, the masking panel's rules: dabs are captured
+// in source-UV with the brush settings frozen at paint time, spaced a quarter
+// radius apart measured in aspect-corrected UV (so spacing is round on
+// screen), and Shift+click draws a straight line at that spacing. The first
+// dab of each stroke carries `strokeStart`, so core caps each stroke's opacity
+// on its own and stacks the strokes.
+
+import type { BrushDab } from "./safelight";
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+/** The brush a dab is stamped with: size is a radius in image-height units,
+ *  the rest 0 to 1. */
+export interface BrushSettings {
+  brushSize: number;
+  brushFeather: number;
+  brushOpacity: number;
+  brushFlow: number;
+  brushErase: boolean;
+}
+
+export interface Dab extends BrushDab {
+  opacity: number;
+  flow: number;
+}
+
+export const DAB_SPACING = 0.25;
+
+export function makeDab(p: Point, brush: BrushSettings, altKey: boolean, strokeStart: boolean): Dab {
+  return {
+    x: p.x,
+    y: p.y,
+    radius: brush.brushSize,
+    erase: altKey || brush.brushErase,
+    feather: brush.brushFeather,
+    opacity: brush.brushOpacity,
+    flow: brush.brushFlow,
+    ...(strokeStart ? { strokeStart: true } : {}),
+  };
+}
+
+export function dabDistance(a: Point, b: Point, aspect: number): number {
+  return Math.hypot((b.x - a.x) * aspect, b.y - a.y);
+}
+
+export function shouldStamp(last: Point, cur: Point, brush: BrushSettings, aspect: number): boolean {
+  return dabDistance(last, cur, aspect) >= brush.brushSize * DAB_SPACING;
+}
+
+/** A Shift+click line from the last point: its own stroke, the first dab
+ *  past `from` starting it. */
+export function lineDabs(from: Point, to: Point, brush: BrushSettings, aspect: number, altKey: boolean): Dab[] {
+  const steps = Math.max(1, Math.ceil(dabDistance(from, to, aspect) / (brush.brushSize * DAB_SPACING)));
+  const dabs: Dab[] = [];
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps;
+    dabs.push(makeDab({ x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t }, brush, altKey, i === 1));
+  }
+  return dabs;
+}
