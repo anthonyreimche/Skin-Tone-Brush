@@ -1,7 +1,7 @@
 {
   "id": "skin-tone-brush",
   "name": "Skin Tone Brush",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Paint over skin to even out blotchy tone and colour while pores and fine texture stay as they were: frequency separation under a brush, with Smoothing, Texture and their sizes.",
   "author": "Anthony Reimche",
   "main": "dist/index.js",

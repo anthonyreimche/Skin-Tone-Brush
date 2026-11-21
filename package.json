@@ -1,7 +1,7 @@
 {
   "name": "safelight-skin-tone-brush",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Skin Tone Brush extension for Safelight: frequency-separation skin smoothing under a brush.",
   "type": "module",
   "scripts": {

@@ -118,7 +118,7 @@ float stbPacked(ivec2 blk, int ch) {
   return fetchPrev4(clamp(blk * 2 + ivec2(ch % 2, ch / 2), ivec2(0), stbSize() - 1)).a;
 }
 vec3 stbBlock(ivec2 blk) { return vec3(stbPacked(blk, 0), stbPacked(blk, 1), stbPacked(blk, 2)); }
-vec3 stbEven(ivec2 p) {
+vec3 stbEven(highp ivec2 p) {
   ivec2 nb = max(stbSize() / 2, ivec2(1));
   vec2 u = (vec2(p) - 0.5) * 0.5;
   vec2 i0 = floor(u);
