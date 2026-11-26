@@ -3,7 +3,6 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { DAB_SPACING, lineDabs, makeDab, shouldStamp, type BrushSettings, type Dab } from "../src/brush";
-import { brushStep } from "../src/keys";
 import { DEFAULT_SETTINGS, PARAM, readSettings } from "../src/params";
 import { appendDabs, clearMask, commitSlider, endStroke, hasPaint, maskPatch, readMask, resetAll, setSlider } from "../src/persistence";
 import { initRuntime } from "../src/rt";
@@ -45,16 +44,6 @@ describe("the stroke model", () => {
     expect(dabs.filter((d) => d.strokeStart)).toHaveLength(1);
     expect(dabs[0].strokeStart).toBe(true);
     expect(dabs[dabs.length - 1].y).toBeCloseTo(0.6, 12);
-  });
-});
-
-describe("the brush shortcuts", () => {
-  it("step one setting within core's limits", () => {
-    expect(brushStep("brush.larger", BRUSH)).toEqual({ brushSize: 0.11 });
-    expect(brushStep("brush.smaller", { ...BRUSH, brushSize: 0.01 })).toEqual({ brushSize: 0.01 });
-    expect(brushStep("brush.featherUp", { ...BRUSH, brushFeather: 1 })).toEqual({ brushFeather: 1 });
-    expect(brushStep("brush.flowDown", BRUSH)).toEqual({ brushFlow: 0.5 });
-    expect(brushStep("develop.undo", BRUSH)).toBeNull();
   });
 });
 

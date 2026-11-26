@@ -54,18 +54,26 @@ describe("the panel", () => {
 
   it("names the shortcut on the Paint button", () => {
     mount();
-    expect(screen.getByText("Paint").getAttribute("title")).toBe("Paint over skin (Shift+K)");
+    expect(screen.getByText("Paint").getAttribute("title")).toContain("Paint over skin (Shift+K)");
   });
 
-  it("explains where the sliders act until something is painted", () => {
+  it("explains where the sliders act in tooltips, not panel text", () => {
     mount();
-    expect(screen.getByText("Nothing painted")).toBeTruthy();
-    expect(screen.getByText(/act only where you paint/)).toBeTruthy();
+    expect(screen.queryByText("Nothing painted")).toBeNull();
+    expect(screen.queryByText(/act only where you paint/)).toBeNull();
+    expect(screen.getByText("Paint").getAttribute("title")).toContain("the sliders act only where you paint");
     cleanup();
     deactivate();
     mount(painted);
-    expect(screen.getByText("Painted")).toBeTruthy();
-    expect(screen.queryByText(/act only where you paint/)).toBeNull();
+    expect(screen.queryByText("Painted")).toBeNull();
+    expect(screen.getByText("Paint").getAttribute("title")).toBe("Paint over skin (Shift+K)");
+  });
+
+  it("lists the brush shortcuts in a tooltip while the brush is on", () => {
+    mount();
+    fireEvent.click(screen.getByText("Paint"));
+    expect(screen.queryByText(/Alt erase/)).toBeNull();
+    expect(screen.getByTitle(/Alt erase/)).toBeTruthy();
   });
 
   it("clears the mask, and offers to only when there is paint", () => {
@@ -87,11 +95,11 @@ describe("the panel", () => {
     expect(rig.sliders(container).map((s) => s.label)).not.toContain("Size");
     fireEvent.click(screen.getByText("Paint"));
     const brush = rig.sliders(container).slice(SLIDERS.length);
-    expect(brush.map((s) => [s.label, s.value])).toEqual([
-      ["Size", 8],
-      ["Feather", 50],
-      ["Opacity", 100],
-      ["Flow", 100],
+    expect(brush.map((s) => [s.label, s.value, s.defaultValue])).toEqual([
+      ["Size", 7, 7],
+      ["Feather", 40, 40],
+      ["Opacity", 90, 90],
+      ["Flow", 80, 80],
     ]);
     expect(screen.getByText("Erase")).toBeTruthy();
     expect(screen.getByText("Show mask")).toBeTruthy();

@@ -28,7 +28,7 @@ describe("activate", () => {
   });
 
   it("keeps the manifest and package versions in step", () => {
-    expect(manifest.version).toBe("1.0.1");
+    expect(manifest.version).toBe("1.1.0");
     expect(pkg.version).toBe(manifest.version);
     expect(manifest.license).toBe("GPL-3.0-or-later");
     expect(pkg.license).toBe(manifest.license);

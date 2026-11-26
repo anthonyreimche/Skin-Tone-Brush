@@ -37,10 +37,14 @@ type FakeMembers = Pick<
   | "unregisterProcessingStage"
   | "registerKeybinding"
 > & {
+  navigation: Pick<SafelightAPI["navigation"], "current">;
   components: Pick<SafelightAPI["components"], "Slider">;
-  develop: Pick<SafelightAPI["develop"], "setCanvasTool" | "useCanvasToolHeld" | "setCanvasCursor" | "useDevelopOverlay">;
-  ui: Pick<SafelightAPI["ui"], "Button" | "Row" | "Stack" | "Toggle">;
-  stores: Pick<SafelightAPI["stores"], "create" | "useDevelopStore" | "useUIStore">;
+  develop: Pick<
+    SafelightAPI["develop"],
+    "setCanvasTool" | "useCanvasToolHeld" | "setCanvasCursor" | "useDevelopOverlay" | "brush" | "BrushCursor" | "framePoint"
+  >;
+  ui: Pick<SafelightAPI["ui"], "Button" | "Row" | "Stack" | "Toggle" | "tokens">;
+  stores: Pick<SafelightAPI["stores"], "create" | "useDevelopStore">;
   keybindings: Pick<SafelightAPI["keybindings"], "getBinding">;
 };
 
@@ -53,6 +57,34 @@ export interface FakeDevelop {
 }
 
 export const IMAGE = { w: 400, h: 200 };
+
+/** The official brush's defaults as the fake hands them out; not the extension's own. */
+export const BRUSH_DEFAULTS = Object.freeze({ size: 0.07, feather: 0.4, opacity: 0.9, flow: 0.8 });
+
+type BrushSetting = keyof typeof BRUSH_DEFAULTS;
+
+// A stand-in for core's step table: one step up per setting, enough to show
+// the extension hands its settings to core and applies what comes back.
+const BRUSH_STEPS: Record<string, { key: BrushSetting; by: number }> = {
+  "brush.larger": { key: "size", by: 0.01 },
+  "brush.smaller": { key: "size", by: -0.01 },
+  "brush.featherUp": { key: "feather", by: 0.05 },
+  "brush.opacityUp": { key: "opacity", by: 0.1 },
+  "brush.flowUp": { key: "flow", by: 0.1 },
+};
+
+function stepBrush(action: string, brush: Partial<Record<BrushSetting, number>>) {
+  const s = BRUSH_STEPS[action];
+  const now = s ? brush[s.key] : undefined;
+  return s && now !== undefined ? { key: s.key, value: now + s.by } : null;
+}
+
+export interface BrushCursorSeen {
+  at: { x: number; y: number } | "centre" | null;
+  size: number;
+  feather: number;
+  erase?: boolean;
+}
 
 export interface Rig {
   api: SafelightAPI;
@@ -70,6 +102,8 @@ export interface Rig {
   tool(): CanvasTool | null;
   /** Another tool (crop, masks) takes the canvas. */
   takeCanvas(): void;
+  /** What the official brush ring was last drawn with, if it is showing. */
+  brushCursor(): BrushCursorSeen | null;
   /** The canvas cursors asked for and not yet released, the latest last. */
   cursors: string[];
   develop: { setState(patch: Partial<FakeDevelop>): void };
@@ -85,6 +119,12 @@ export function fakeApi(initial: Record<string, unknown> = {}): Rig {
   const cursors: string[] = [];
   const sliderProps = new Map<number, SliderProps>();
   let nextSlider = 0;
+  let cursorSeen: BrushCursorSeen | null = null;
+
+  function BrushCursor(props: BrushCursorSeen) {
+    cursorSeen = props.at === null ? null : { ...props };
+    return null;
+  }
 
   const develop = create<FakeDevelop>()((set) => ({
     photoId: "photo-1",
@@ -112,6 +152,7 @@ export function fakeApi(initial: Record<string, unknown> = {}): Rig {
     radiusToImage: (px) => px / IMAGE.h,
     region: { x: 0, y: 0, width: 1, height: 1 },
     imageAspect: IMAGE.w / IMAGE.h,
+    zoomScale: 1,
   };
 
   const members: FakeMembers = {
@@ -135,12 +176,18 @@ export function fakeApi(initial: Record<string, unknown> = {}): Rig {
         };
       },
       useDevelopOverlay: () => geometry,
+      brush: { defaults: BRUSH_DEFAULTS, actions: Object.keys(BRUSH_STEPS), step: stepBrush },
+      BrushCursor,
+      framePoint: (el, clientX, clientY) => {
+        const r = el.getBoundingClientRect();
+        return { x: clientX - r.left, y: clientY - r.top };
+      },
     },
     ui: ui as unknown as FakeMembers["ui"],
+    navigation: { current: () => uiStore.getState().activeModule },
     stores: {
       create,
       useDevelopStore: develop as unknown as SafelightAPI["stores"]["useDevelopStore"],
-      useUIStore: uiStore as unknown as SafelightAPI["stores"]["useUIStore"],
     },
     keybindings: { getBinding: (id) => keybindings.find((k) => k.id === id)?.defaultCombo ?? "" },
   };
@@ -154,6 +201,7 @@ export function fakeApi(initial: Record<string, unknown> = {}): Rig {
     commits,
     unregistered,
     cursors,
+    brushCursor: () => cursorSeen,
     tool: () => {
       const s = canvas.getState();
       return s.owner === EXT_ID ? s.held : null;
@@ -173,6 +221,7 @@ export function fakeApi(initial: Record<string, unknown> = {}): Rig {
 const e = React.createElement;
 
 const ui = {
+  tokens: { surface2: "var(--color-surface-2)" },
   Button: ({ active, size: _size, variant: _variant, full: _full, ...rest }: ButtonProps) =>
     e("button", { ...rest, "data-active": active ? "true" : "false" }),
   Row: (props: RowProps) => e("div", null, props.children),

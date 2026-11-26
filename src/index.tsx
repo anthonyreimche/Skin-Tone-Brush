@@ -8,7 +8,6 @@
 // overlay (Overlay.tsx) is the canvas tool held while the brush is on, and
 // paints the photo's mask, which core bakes into the stage's coverage.
 
-import { inDevelop } from "./keys";
 import { SKIN_TOOL } from "./Overlay";
 import { SkinPanel } from "./Panel";
 import { EXT_ID, PAINT_ACTION_ID, PANEL_ID, STAGE_ID } from "./params";
@@ -41,7 +40,7 @@ export function activate(host: SafelightAPI): void {
     category: "Develop",
     defaultCombo: "Shift+K",
     handler: () => {
-      if (inDevelop() && host.stores.useDevelopStore.getState().photoId) store().getState().toggleArmed();
+      if (host.navigation.current() === "develop" && host.stores.useDevelopStore.getState().photoId) store().getState().toggleArmed();
     },
   });
 
@@ -50,6 +49,7 @@ export function activate(host: SafelightAPI): void {
     title: "Skin Tone Brush",
     component: SkinPanel,
     defaultDock: { module: "develop", direction: "right", width: 250 },
+    modules: ["develop"],
     onReset: () => void resetAll(),
   });
 }

@@ -24,19 +24,15 @@ export interface BrushState extends BrushSettings {
   setBrushPreview(v: boolean): void;
 }
 
-export const BRUSH_DEFAULTS: BrushSettings = {
-  brushSize: 0.08,
-  brushFeather: 0.5,
-  brushOpacity: 1,
-  brushFlow: 1,
-  brushErase: false,
-};
-
 let instance: AppStore<BrushState> | null = null;
 
 export function initStore(): AppStore<BrushState> {
   instance = api.stores.create<BrushState>()((set) => ({
-    ...BRUSH_DEFAULTS,
+    brushSize: api.develop.brush.defaults.size,
+    brushFeather: api.develop.brush.defaults.feather,
+    brushOpacity: api.develop.brush.defaults.opacity,
+    brushFlow: api.develop.brush.defaults.flow,
+    brushErase: false,
     armed: false,
     showMask: true,
     brushPreview: false,

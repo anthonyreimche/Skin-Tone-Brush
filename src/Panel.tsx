@@ -8,27 +8,26 @@
 // Erase switch, Show mask, and the shortcuts. Sliders write the photo's edit
 // as they move and commit on release.
 
-import type { CSSProperties } from "react";
 import { PAINT_ACTION_ID, SLIDERS, readSettings, type SliderSpec } from "./params";
 import { clearMask, commitSlider, hasPaint, readMask, setSlider } from "./persistence";
 import { React, api } from "./rt";
 import type { BrushSettings } from "./brush";
 import { store } from "./store";
 
-const HINT: CSSProperties = { fontSize: "10px", color: "var(--color-text-muted)", lineHeight: 1.4 };
+const BRUSH_KEYS_TIP = "Alt erase · [ ] size · ⇧[ ] feather · , . opacity · ⇧, ⇧. flow";
 
 type BrushNumber = Exclude<keyof BrushSettings, "brushErase">;
 
-const BRUSH_SLIDERS: { key: BrushNumber; label: string; min: number; max: number; defaultValue: number }[] = [
-  { key: "brushSize", label: "Size", min: 1, max: 50, defaultValue: 8 },
-  { key: "brushFeather", label: "Feather", min: 0, max: 100, defaultValue: 50 },
-  { key: "brushOpacity", label: "Opacity", min: 1, max: 100, defaultValue: 100 },
-  { key: "brushFlow", label: "Flow", min: 1, max: 100, defaultValue: 100 },
+const BRUSH_SLIDERS: { key: BrushNumber; label: string; min: number; max: number; official: "size" | "feather" | "opacity" | "flow" }[] = [
+  { key: "brushSize", label: "Size", min: 1, max: 50, official: "size" },
+  { key: "brushFeather", label: "Feather", min: 0, max: 100, official: "feather" },
+  { key: "brushOpacity", label: "Opacity", min: 1, max: 100, official: "opacity" },
+  { key: "brushFlow", label: "Flow", min: 1, max: 100, official: "flow" },
 ];
 
 export function SkinPanel() {
   const { Slider } = api.components;
-  const { Button, Toggle, Row, Stack } = api.ui;
+  const { Button, Toggle, Row, Stack, tokens } = api.ui;
   const dev = api.stores.useDevelopStore;
   const paramBag = dev((s) => s.paramBag);
   const armed = store()((s) => s.armed);
@@ -44,6 +43,12 @@ export function SkinPanel() {
   const settings = readSettings(paramBag);
   const painted = hasPaint(readMask(paramBag));
   const combo = api.keybindings.getBinding(PAINT_ACTION_ID);
+  const paintTitle = [
+    combo ? `Paint over skin (${combo})` : "Paint over skin",
+    painted ? null : "the sliders act only where you paint",
+  ]
+    .filter(Boolean)
+    .join(": ");
 
   const separationSlider = (s: SliderSpec) => (
     <Slider
@@ -67,7 +72,7 @@ export function SkinPanel() {
       min={b.min}
       max={b.max}
       step={1}
-      defaultValue={b.defaultValue}
+      defaultValue={Math.round(api.develop.brush.defaults[b.official] * 100)}
       onChange={(v: number) => {
         store().getState().setBrush({ [b.key]: v / 100 });
         store().getState().setBrushPreview(true);
@@ -83,7 +88,7 @@ export function SkinPanel() {
         <Button
           size="sm"
           active={armed}
-          title={combo ? `Paint over skin (${combo})` : "Paint over skin"}
+          title={paintTitle}
           onClick={() => store().getState().toggleArmed()}
         >
           {armed ? "Done" : "Paint"}
@@ -91,18 +96,17 @@ export function SkinPanel() {
         <Button size="sm" variant="ghost" disabled={!painted} onClick={() => void clearMask()}>
           Clear
         </Button>
-        <span style={{ ...HINT, marginLeft: "auto" }}>{painted ? "Painted" : "Nothing painted"}</span>
       </Row>
-      {!painted && !armed ? <span style={HINT}>Paint over skin: the sliders act only where you paint.</span> : null}
       {armed ? (
-        <Stack gap={2} style={{ padding: "6px", borderRadius: "4px", background: "var(--color-surface-2)" }}>
-          {BRUSH_SLIDERS.map(brushSlider)}
-          <Row gap={12} style={{ marginTop: "4px" }}>
-            <Toggle checked={brush.brushErase} onChange={(v: boolean) => store().getState().setBrush({ brushErase: v })} label="Erase" />
-            <Toggle checked={showMask} onChange={(v: boolean) => store().getState().setShowMask(v)} label="Show mask" />
-          </Row>
-          <span style={HINT}>Alt erase · [ ] size · ⇧[ ] feather · , . opacity · ⇧, ⇧. flow</span>
-        </Stack>
+        <div title={BRUSH_KEYS_TIP}>
+          <Stack gap={2} style={{ padding: "6px", borderRadius: "4px", background: tokens.surface2 }}>
+            {BRUSH_SLIDERS.map(brushSlider)}
+            <Row gap={12} style={{ marginTop: "4px" }}>
+              <Toggle checked={brush.brushErase} onChange={(v: boolean) => store().getState().setBrush({ brushErase: v })} label="Erase" />
+              <Toggle checked={showMask} onChange={(v: boolean) => store().getState().setShowMask(v)} label="Show mask" />
+            </Row>
+          </Stack>
+        </div>
       ) : null}
     </Stack>
   );

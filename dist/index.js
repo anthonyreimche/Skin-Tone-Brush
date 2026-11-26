@@ -1,74 +1,6 @@
-//#region src/rt.ts
-var e, t;
-function n(n) {
-	t = n, e = n.react;
-}
-//#endregion
-//#region src/keys.ts
-var r = {
-	"brush.smaller": {
-		key: "brushSize",
-		step: -.01,
-		min: .01,
-		max: .5
-	},
-	"brush.larger": {
-		key: "brushSize",
-		step: .01,
-		min: .01,
-		max: .5
-	},
-	"brush.featherDown": {
-		key: "brushFeather",
-		step: -.05,
-		min: 0,
-		max: 1
-	},
-	"brush.featherUp": {
-		key: "brushFeather",
-		step: .05,
-		min: 0,
-		max: 1
-	},
-	"brush.opacityDown": {
-		key: "brushOpacity",
-		step: -.1,
-		min: .01,
-		max: 1
-	},
-	"brush.opacityUp": {
-		key: "brushOpacity",
-		step: .1,
-		min: .01,
-		max: 1
-	},
-	"brush.flowDown": {
-		key: "brushFlow",
-		step: -.1,
-		min: .01,
-		max: 1
-	},
-	"brush.flowUp": {
-		key: "brushFlow",
-		step: .1,
-		min: .01,
-		max: 1
-	}
-};
-function i(e, t) {
-	let n = r[e];
-	if (!n) return null;
-	let i = Math.round((t[n.key] + n.step) * 100) / 100;
-	return { [n.key]: Math.max(n.min, Math.min(n.max, i)) };
-}
-function a() {
-	let e = new URLSearchParams(window.location.search).get("detached");
-	return t.stores.useUIStore.getState().activeModule === "develop" || e === "develop";
-}
-//#endregion
 //#region src/brush.ts
-var o = .25;
-function s(e, t, n, r) {
+var e = .25;
+function t(e, t, n, r) {
 	return {
 		x: e.x,
 		y: e.y,
@@ -80,35 +12,26 @@ function s(e, t, n, r) {
 		...r ? { strokeStart: !0 } : {}
 	};
 }
-function c(e, t, n) {
+function n(e, t, n) {
 	return Math.hypot((t.x - e.x) * n, t.y - e.y);
 }
-function l(e, t, n, r) {
-	return c(e, t, r) >= n.brushSize * o;
+function r(t, r, i, a) {
+	return n(t, r, a) >= i.brushSize * e;
 }
-function u(e, t, n, r, i) {
-	let a = Math.max(1, Math.ceil(c(e, t, r) / (n.brushSize * o))), l = [];
-	for (let r = 1; r <= a; r++) {
-		let o = r / a;
-		l.push(s({
-			x: e.x + (t.x - e.x) * o,
-			y: e.y + (t.y - e.y) * o
-		}, n, i, r === 1));
+function i(r, i, a, o, s) {
+	let c = Math.max(1, Math.ceil(n(r, i, o) / (a.brushSize * e))), l = [];
+	for (let e = 1; e <= c; e++) {
+		let n = e / c;
+		l.push(t({
+			x: r.x + (i.x - r.x) * n,
+			y: r.y + (i.y - r.y) * n
+		}, a, s, e === 1));
 	}
 	return l;
 }
 //#endregion
-//#region src/geometry.ts
-function d(e, t, n) {
-	let r = e.getBoundingClientRect(), i = e.offsetWidth > 0 && r.width > 0 ? r.width / e.offsetWidth : 1;
-	return {
-		lx: (t - r.left) / i,
-		ly: (n - r.top) / i
-	};
-}
-//#endregion
 //#region src/params.ts
-var f = "skin-tone-brush", p = `${f}.smooth`, m = `${f}.panel`, h = `${f}.paint`, g = [
+var a = "skin-tone-brush", o = `${a}.smooth`, s = `${a}.panel`, c = `${a}.paint`, l = [
 	{
 		key: "smoothing",
 		label: "Smoothing",
@@ -141,89 +64,93 @@ var f = "skin-tone-brush", p = `${f}.smooth`, m = `${f}.panel`, h = `${f}.paint`
 		default: 50,
 		history: "Skin Texture Size"
 	}
-], _ = {
+], u = {
 	smoothing: 50,
 	smoothSize: 50,
 	textureAmount: 100,
 	textureSize: 50
-}, v = (e) => `${p}.${e}`, y = "mask", b = "maskOn", x = {
-	mask: v(y),
-	maskOn: v(b),
-	smoothing: v("smoothing"),
-	smoothSize: v("smoothSize"),
-	textureAmount: v("textureAmount"),
-	textureSize: v("textureSize")
-}, S = (e) => typeof e == "number" && Number.isFinite(e);
-function ee(e) {
-	let t = { ..._ };
-	for (let n of g) {
-		let r = e[x[n.key]];
-		S(r) && (t[n.key] = Math.min(n.max, Math.max(n.min, r)));
+}, d = (e) => `${o}.${e}`, f = "mask", p = "maskOn", m = {
+	mask: d(f),
+	maskOn: d(p),
+	smoothing: d("smoothing"),
+	smoothSize: d("smoothSize"),
+	textureAmount: d("textureAmount"),
+	textureSize: d("textureSize")
+}, h = (e) => typeof e == "number" && Number.isFinite(e);
+function g(e) {
+	let t = { ...u };
+	for (let n of l) {
+		let r = e[m[n.key]];
+		h(r) && (t[n.key] = Math.min(n.max, Math.max(n.min, r)));
 	}
 	return t;
 }
-function te(e) {
-	return Object.fromEntries(g.map((t) => [x[t.key], e[t.key]]));
+function _(e) {
+	return Object.fromEntries(l.map((t) => [m[t.key], e[t.key]]));
+}
+//#endregion
+//#region src/rt.ts
+var v, y;
+function b(e) {
+	y = e, v = e.react;
 }
 //#endregion
 //#region src/persistence.ts
-var C = (e) => typeof e == "number" && Number.isFinite(e);
-function w(e) {
+var x = (e) => typeof e == "number" && Number.isFinite(e);
+function S(e) {
 	if (typeof e != "object" || !e) return !1;
 	let t = e;
-	return C(t.x) && C(t.y) && C(t.radius) && C(t.feather) && C(t.opacity) && C(t.flow) && typeof t.erase == "boolean";
+	return x(t.x) && x(t.y) && x(t.radius) && x(t.feather) && x(t.opacity) && x(t.flow) && typeof t.erase == "boolean";
 }
+function C(e) {
+	let t = e[m.mask];
+	return Array.isArray(t) && t.every(S) ? t : [];
+}
+var w = (e) => e.some((e) => !e.erase);
 function T(e) {
-	let t = e[x.mask];
-	return Array.isArray(t) && t.every(w) ? t : [];
-}
-var E = (e) => e.some((e) => !e.erase);
-function D(e) {
 	return {
-		[x.mask]: [...e],
-		[x.maskOn]: +!!E(e)
+		[m.mask]: [...e],
+		[m.maskOn]: +!!w(e)
 	};
 }
+function E() {
+	return y.stores.useDevelopStore.getState();
+}
+function D(e) {
+	let t = E();
+	t.setDynParams(T([...C(t.paramBag), ...e]));
+}
 function O() {
-	return t.stores.useDevelopStore.getState();
+	return E().commitEdit("Skin Brush Stroke");
 }
-function ne(e) {
-	let t = O();
-	t.setDynParams(D([...T(t.paramBag), ...e]));
+async function k() {
+	let e = E();
+	e.setDynParams(T([])), await e.commitEdit("Clear Skin Brush");
 }
-function k() {
-	return O().commitEdit("Skin Brush Stroke");
+function A(e, t) {
+	E().setDynParam(m[e], t);
 }
-async function A() {
-	let e = O();
-	e.setDynParams(D([])), await e.commitEdit("Clear Skin Brush");
+function j(e) {
+	let t = l.find((t) => t.key === e);
+	return E().commitEdit(t?.history ?? "Skin Tone Brush");
 }
-function j(e, t) {
-	O().setDynParam(x[e], t);
-}
-function M(e) {
-	let t = g.find((t) => t.key === e);
-	return O().commitEdit(t?.history ?? "Skin Tone Brush");
-}
-async function N() {
-	let e = O();
+async function M() {
+	let e = E();
 	e.setDynParams({
-		...te(_),
-		...D([])
+		..._(u),
+		...T([])
 	}), await e.commitEdit("Reset Skin Tone Brush");
 }
 //#endregion
 //#region src/store.ts
-var P = {
-	brushSize: .08,
-	brushFeather: .5,
-	brushOpacity: 1,
-	brushFlow: 1,
-	brushErase: !1
-}, F = null;
-function I() {
-	return F = t.stores.create()((e) => ({
-		...P,
+var N = null;
+function P() {
+	return N = y.stores.create()((e) => ({
+		brushSize: y.develop.brush.defaults.size,
+		brushFeather: y.develop.brush.defaults.feather,
+		brushOpacity: y.develop.brush.defaults.opacity,
+		brushFlow: y.develop.brush.defaults.flow,
+		brushErase: !1,
 		armed: !1,
 		showMask: !0,
 		brushPreview: !1,
@@ -232,16 +159,16 @@ function I() {
 		setShowMask: (t) => e({ showMask: t }),
 		setBrush: (t) => e(t),
 		setBrushPreview: (t) => e({ brushPreview: t })
-	})), F;
+	})), N;
 }
-function L() {
-	if (!F) throw Error("[skin-tone-brush] store used before activate()");
-	return F;
+function F() {
+	if (!N) throw Error("[skin-tone-brush] store used before activate()");
+	return N;
 }
 //#endregion
 //#region src/wash.ts
-var R = "230, 64, 64", re = .5;
-function z(e, t) {
+var I = "230, 64, 64", ee = .5;
+function L(e, t) {
 	let n = t.radiusToScreen(e.radius);
 	if (n < .3) return null;
 	let { x: r, y: i } = t.toScreen(e.x, e.y);
@@ -251,35 +178,33 @@ function z(e, t) {
 		r: n
 	};
 }
-function B(e, t, n) {
+function R(e, t, n) {
 	e.setTransform(1, 0, 0, 1, 0, 0);
 	for (let r of t) {
-		let t = z(r, n);
+		let t = L(r, n);
 		if (!t) continue;
 		let i = Math.max(0, Math.min(1, 1 - r.feather)), a = Math.max(0, Math.min(1, r.flow * (r.erase ? 1 : r.opacity))), o = e.createRadialGradient(t.x, t.y, 0, t.x, t.y, t.r);
-		o.addColorStop(0, `rgba(${R}, ${a})`), o.addColorStop(i, `rgba(${R}, ${a})`), o.addColorStop(1, `rgba(${R}, 0)`), e.globalCompositeOperation = r.erase ? "destination-out" : "source-over", e.fillStyle = o, e.beginPath(), e.arc(t.x, t.y, t.r, 0, Math.PI * 2), e.fill();
+		o.addColorStop(0, `rgba(${I}, ${a})`), o.addColorStop(i, `rgba(${I}, ${a})`), o.addColorStop(1, `rgba(${I}, 0)`), e.globalCompositeOperation = r.erase ? "destination-out" : "source-over", e.fillStyle = o, e.beginPath(), e.arc(t.x, t.y, t.r, 0, Math.PI * 2), e.fill();
 	}
 	e.globalCompositeOperation = "source-over";
 }
-function ie(e, t, n, r, i) {
-	e.setTransform(1, 0, 0, 1, 0, 0), e.globalCompositeOperation = "source-over", e.clearRect(0, 0, r, i), B(e, t, n);
+function te(e, t, n, r, i) {
+	e.setTransform(1, 0, 0, 1, 0, 0), e.globalCompositeOperation = "source-over", e.clearRect(0, 0, r, i), R(e, t, n);
 }
-function ae(e, t) {
+function ne(e, t) {
 	if (t.length < e.length) return null;
 	for (let n = 0; n < e.length; n++) if (t[n] !== e[n]) return null;
 	return t.slice(e.length);
 }
 //#endregion
 //#region src/Overlay.tsx
-var V = {
-	position: "absolute",
-	display: "none",
-	transform: "translate(-50%, -50%)",
-	borderRadius: "50%",
-	boxShadow: "0 0 0 1px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.35)",
-	pointerEvents: "none"
+var z = {
+	size: "brushSize",
+	feather: "brushFeather",
+	opacity: "brushOpacity",
+	flow: "brushFlow"
 };
-function H(e) {
+function B(e) {
 	let { brushSize: t, brushFeather: n, brushOpacity: r, brushFlow: i, brushErase: a } = e;
 	return {
 		brushSize: t,
@@ -289,284 +214,221 @@ function H(e) {
 		brushErase: a
 	};
 }
-function oe(e) {
-	return e instanceof HTMLElement && (e.tagName === "INPUT" || e.tagName === "TEXTAREA" || e.isContentEditable);
-}
-function se() {
-	let n = t.stores.useDevelopStore, r = L()((e) => e.armed), i = L()((e) => e.showMask), a = L()((e) => e.brushSize), o = L()((e) => e.brushFeather), c = L()((e) => e.brushErase), f = L()((e) => e.brushPreview), p = n((e) => e.photoId), m = n((e) => e.paramBag[x.mask]), { rect: h, nonce: g, toImage: _, toScreen: v, radiusToScreen: y, imageAspect: b } = t.develop.useDevelopOverlay(), [S, ee] = e.useState(!1), [te, C] = e.useState(!1), w = e.useRef(!1), E = e.useRef(null), D = e.useRef(null), O = e.useRef(null), A = e.useRef(null), j = e.useRef(null), M = e.useRef(null), N = e.useRef(null), P = e.useRef({
-		lx: 0,
-		ly: 0,
-		shown: !1
-	}), F = r && !!h && !!p && !!_ && !!v && !!y, I = (e) => {
-		w.current = e, ee(e);
-	};
-	e.useEffect(() => {
-		if (F && !S) return t.develop.setCanvasCursor("none", { priority: 20 });
-	}, [F, S]), e.useEffect(() => {
-		M.current = null, N.current = null;
-	}, [p]), e.useEffect(() => {
-		if (!F) {
-			I(!1);
-			return;
-		}
-		let e = (e) => {
-			oe(e.target) || ((e.code === "Space" || e.ctrlKey || e.metaKey) && I(!0), e.altKey && C(!0));
-		}, t = (e) => {
-			(e.code === "Space" || !(e.ctrlKey || e.metaKey)) && I(!1), e.altKey || C(!1);
-		}, n = () => {
-			I(!1), C(!1);
-		};
-		return window.addEventListener("keydown", e, !0), window.addEventListener("keyup", t, !0), window.addEventListener("blur", n), () => {
-			window.removeEventListener("keydown", e, !0), window.removeEventListener("keyup", t, !0), window.removeEventListener("blur", n), I(!1);
-		};
-	}, [F]);
-	let R = (e, t, n) => {
-		P.current = {
-			lx: e,
-			ly: t,
-			shown: n
-		};
-		let r = L().getState(), i = y ? y(r.brushSize) : 0, a = (r, i) => {
-			r && (r.style.display = n ? "block" : "none", r.style.width = `${i}px`, r.style.height = `${i}px`, r.style.left = `${e}px`, r.style.top = `${t}px`);
-		};
-		a(D.current, Math.max(3, i) * 2), a(O.current, Math.max(1, i * (1 - r.brushFeather)) * 2);
-	};
-	e.useEffect(() => {
-		P.current.shown && R(P.current.lx, P.current.ly, !0);
-	}, [a, o]), e.useEffect(() => {
-		let e = A.current, t = E.current;
-		if (!F || !i || !e || !t || !v || !y) return;
-		let r = Math.max(1, Math.round(t.clientWidth)), a = Math.max(1, Math.round(t.clientHeight));
-		(e.width !== r || e.height !== a) && (e.width = r, e.height = a, j.current = null);
-		let o = e.getContext("2d");
+function V() {
+	let e = y.stores.useDevelopStore, n = F()((e) => e.armed), a = F()((e) => e.showMask), o = F()((e) => e.brushSize), s = F()((e) => e.brushFeather), c = F()((e) => e.brushErase), l = F()((e) => e.brushPreview), u = e((e) => e.photoId), d = e((e) => e.paramBag[m.mask]), { rect: f, nonce: p, toImage: h, toScreen: g, radiusToScreen: _, imageAspect: b } = y.develop.useDevelopOverlay(), [x, S] = v.useState(!1), [w, T] = v.useState(null), E = v.useRef(null), k = v.useRef(null), A = v.useRef(null), j = v.useRef(null), M = v.useRef(null), N = n && !!f && !!u && !!h && !!g && !!_;
+	v.useEffect(() => {
+		if (N) return y.develop.setCanvasCursor("crosshair", { priority: 20 });
+	}, [N]), v.useEffect(() => {
+		j.current = null, M.current = null;
+	}, [u]), v.useEffect(() => {
+		let t = k.current, n = E.current;
+		if (!N || !a || !t || !n || !g || !_) return;
+		let r = Math.max(1, Math.round(n.clientWidth)), i = Math.max(1, Math.round(n.clientHeight));
+		(t.width !== r || t.height !== i) && (t.width = r, t.height = i, A.current = null);
+		let o = t.getContext("2d");
 		if (!o) return;
-		let s = T(n.getState().paramBag), c = {
-			toScreen: v,
-			radiusToScreen: y
-		}, l = j.current, u = l && l.canvas === e && l.nonce === g && l.toScreen === v && l.radiusToScreen === y ? ae(l.dabs, s) : null;
-		u ? B(o, u, c) : ie(o, s, c, r, a), j.current = {
-			canvas: e,
+		let s = C(e.getState().paramBag), c = {
+			toScreen: g,
+			radiusToScreen: _
+		}, l = A.current, u = l && l.canvas === t && l.nonce === p && l.toScreen === g && l.radiusToScreen === _ ? ne(l.dabs, s) : null;
+		u ? R(o, u, c) : te(o, s, c, r, i), A.current = {
+			canvas: t,
 			dabs: s,
-			nonce: g,
-			toScreen: v,
-			radiusToScreen: y
+			nonce: p,
+			toScreen: g,
+			radiusToScreen: _
 		};
 	}, [
-		F,
-		i,
+		N,
+		a,
+		p,
+		d,
 		g,
-		m,
-		v,
-		y,
-		n
-	]), e.useEffect(() => {
-		S && M.current && (M.current = null, k(), R(0, 0, !1));
-	}, [S]);
-	let z = (e) => {
-		if (!F || w.current || e.button !== 0 || !_) return;
-		let { lx: t, ly: n } = d(e.currentTarget, e.clientX, e.clientY), r = _(t, n);
+		_,
+		e
+	]);
+	let P = (e) => {
+		if (!N || e.button !== 0 || !h) return;
+		let n = y.develop.framePoint(e.currentTarget, e.clientX, e.clientY), r = h(n.x, n.y);
 		e.preventDefault(), e.stopPropagation(), e.currentTarget.setPointerCapture(e.pointerId);
-		let i = H(L().getState());
-		ne(e.shiftKey && N.current ? u(N.current, r, i, b, e.altKey) : [s(r, i, e.altKey, !0)]), N.current = r, M.current = { last: r }, R(t, n, !0);
-	}, se = (e) => {
-		if (!F || w.current || !_) return;
-		let { lx: t, ly: n } = d(e.currentTarget, e.clientX, e.clientY);
-		R(t, n, !0), C(e.altKey);
-		let r = M.current;
-		if (!r) return;
-		let i = _(t, n), a = H(L().getState());
-		l(r.last, i, a, b) && (ne([s(i, a, e.altKey, !1)]), r.last = i, N.current = i);
-	}, U = (e) => {
-		M.current && (M.current = null, e.currentTarget.hasPointerCapture(e.pointerId) && e.currentTarget.releasePointerCapture(e.pointerId), k());
+		let a = B(F().getState());
+		D(e.shiftKey && M.current ? i(M.current, r, a, b, e.altKey) : [t(r, a, e.altKey, !0)]), M.current = r, j.current = { last: r }, T(n);
+	}, I = (e) => {
+		if (!N || !h) return;
+		let n = y.develop.framePoint(e.currentTarget, e.clientX, e.clientY);
+		T(n), S(e.altKey);
+		let i = j.current;
+		if (!i) return;
+		let a = h(n.x, n.y), o = B(F().getState());
+		r(i.last, a, o, b) && (D([t(a, o, e.altKey, !1)]), i.last = a, M.current = a);
+	}, L = (e) => {
+		j.current && (j.current = null, e.currentTarget.hasPointerCapture(e.pointerId) && e.currentTarget.releasePointerCapture(e.pointerId), O());
 	};
-	if (!F) return null;
-	let W = te || c, G = `1.5px ${W ? "dashed" : "solid"} ${W ? "rgba(255,107,107,0.95)" : "rgba(255,255,255,0.9)"}`, K = h && y ? y(a) : 0, q = (e, t) => ({
-		...V,
-		display: "block",
-		border: t,
-		left: `${h ? h.x + h.w / 2 : 0}px`,
-		top: `${h ? h.y + h.h / 2 : 0}px`,
-		width: `${e}px`,
-		height: `${e}px`
-	});
-	return /* @__PURE__ */ e.createElement("div", {
+	if (!N) return null;
+	let z = x || c;
+	return /* @__PURE__ */ v.createElement("div", {
 		ref: E,
 		"data-testid": "skin-tone-brush-overlay",
-		onPointerDown: z,
-		onPointerMove: se,
-		onPointerUp: U,
-		onPointerCancel: U,
+		onPointerDown: P,
+		onPointerMove: I,
+		onPointerUp: L,
+		onPointerCancel: L,
 		onPointerLeave: () => {
-			M.current || R(0, 0, !1);
+			j.current || T(null);
 		},
 		style: {
 			position: "absolute",
 			inset: 0,
-			pointerEvents: S ? "none" : "auto",
 			touchAction: "none",
-			cursor: S ? "default" : "none",
 			overflow: "hidden"
 		}
-	}, i ? /* @__PURE__ */ e.createElement("canvas", {
-		ref: A,
+	}, a ? /* @__PURE__ */ v.createElement("canvas", {
+		ref: k,
 		style: {
 			position: "absolute",
 			inset: 0,
 			pointerEvents: "none",
-			opacity: re
+			opacity: ee
 		}
-	}) : null, /* @__PURE__ */ e.createElement("div", {
-		ref: D,
-		style: {
-			...V,
-			border: G
-		}
-	}), /* @__PURE__ */ e.createElement("div", {
-		ref: O,
-		style: {
-			...V,
-			border: "1px solid rgba(255,255,255,0.45)"
-		}
-	}), f && h ? /* @__PURE__ */ e.createElement("div", { style: {
-		position: "absolute",
-		inset: 0,
-		pointerEvents: "none"
-	} }, /* @__PURE__ */ e.createElement("div", { style: q(Math.max(3, K) * 2, "1.5px solid rgba(255,255,255,0.9)") }), /* @__PURE__ */ e.createElement("div", { style: q(Math.max(1, K * (1 - o)) * 2, "1px solid rgba(255,255,255,0.45)") })) : null);
+	}) : null, /* @__PURE__ */ v.createElement(y.develop.BrushCursor, {
+		at: l ? "centre" : w,
+		size: o,
+		feather: s,
+		erase: z
+	}));
 }
-function U(e, t) {
-	let n = i(e, L().getState());
-	return n ? (t && L().getState().setBrush(n), !0) : !1;
+function H(e, t) {
+	let { brushSize: n, brushFeather: r, brushOpacity: i, brushFlow: a } = F().getState(), o = y.develop.brush.step(e, {
+		size: n,
+		feather: r,
+		opacity: i,
+		flow: a
+	});
+	return o ? (t && F().getState().setBrush({ [z[o.key]]: o.value }), !0) : !1;
 }
-var W = {
-	overlay: se,
+var re = {
+	overlay: V,
 	zoomable: !0,
-	onEscape: () => L().getState().setArmed(!1),
-	onAction: (e) => U(e, !0),
-	wants: (e) => U(e, !1)
-}, G = {
-	fontSize: "10px",
-	color: "var(--color-text-muted)",
-	lineHeight: 1.4
-}, K = [
+	onEscape: () => F().getState().setArmed(!1),
+	onAction: (e) => H(e, !0),
+	wants: (e) => H(e, !1)
+}, ie = "Alt erase · [ ] size · ⇧[ ] feather · , . opacity · ⇧, ⇧. flow", ae = [
 	{
 		key: "brushSize",
 		label: "Size",
 		min: 1,
 		max: 50,
-		defaultValue: 8
+		official: "size"
 	},
 	{
 		key: "brushFeather",
 		label: "Feather",
 		min: 0,
 		max: 100,
-		defaultValue: 50
+		official: "feather"
 	},
 	{
 		key: "brushOpacity",
 		label: "Opacity",
 		min: 1,
 		max: 100,
-		defaultValue: 100
+		official: "opacity"
 	},
 	{
 		key: "brushFlow",
 		label: "Flow",
 		min: 1,
 		max: 100,
-		defaultValue: 100
+		official: "flow"
 	}
 ];
-function q() {
-	let { Slider: n } = t.components, { Button: r, Toggle: i, Row: a, Stack: o } = t.ui, s = t.stores.useDevelopStore, c = s((e) => e.paramBag), l = L()((e) => e.armed), u = L()((e) => e.showMask), d = L()((e) => e), f = t.develop.useCanvasToolHeld();
-	e.useEffect(() => {
-		l && !f && L().getState().setArmed(!1);
-	}, [l, f]);
-	let p = ee(c), m = E(T(c)), _ = t.keybindings.getBinding(h), v = (t) => /* @__PURE__ */ e.createElement(n, {
+function oe() {
+	let { Slider: e } = y.components, { Button: t, Toggle: n, Row: r, Stack: i, tokens: a } = y.ui, o = y.stores.useDevelopStore, s = o((e) => e.paramBag), u = F()((e) => e.armed), d = F()((e) => e.showMask), f = F()((e) => e), p = y.develop.useCanvasToolHeld();
+	v.useEffect(() => {
+		u && !p && F().getState().setArmed(!1);
+	}, [u, p]);
+	let m = g(s), h = w(C(s)), _ = y.keybindings.getBinding(c), b = [_ ? `Paint over skin (${_})` : "Paint over skin", h ? null : "the sliders act only where you paint"].filter(Boolean).join(": ");
+	return /* @__PURE__ */ v.createElement(i, {
+		gap: 6,
+		style: { padding: "6px 8px 8px" }
+	}, /* @__PURE__ */ v.createElement("div", { style: {
+		display: "flex",
+		flexDirection: "column",
+		gap: "1px"
+	} }, l.map((t) => /* @__PURE__ */ v.createElement(e, {
 		key: t.key,
 		label: t.label,
-		value: p[t.key],
+		value: m[t.key],
 		min: t.min,
 		max: t.max,
 		step: 1,
 		defaultValue: t.default,
-		onChange: (e) => j(t.key, e),
-		onCommit: () => void M(t.key)
-	}), y = (t) => /* @__PURE__ */ e.createElement(n, {
-		key: t.key,
-		label: t.label,
-		value: Math.round(d[t.key] * 100),
-		min: t.min,
-		max: t.max,
-		step: 1,
-		defaultValue: t.defaultValue,
-		onChange: (e) => {
-			L().getState().setBrush({ [t.key]: e / 100 }), L().getState().setBrushPreview(!0);
-		},
-		onCommit: () => L().getState().setBrushPreview(!1)
-	});
-	return /* @__PURE__ */ e.createElement(o, {
-		gap: 6,
-		style: { padding: "6px 8px 8px" }
-	}, /* @__PURE__ */ e.createElement("div", { style: {
-		display: "flex",
-		flexDirection: "column",
-		gap: "1px"
-	} }, g.map(v)), /* @__PURE__ */ e.createElement(a, {
+		onChange: (e) => A(t.key, e),
+		onCommit: () => void j(t.key)
+	}))), /* @__PURE__ */ v.createElement(r, {
 		gap: 6,
 		style: { marginTop: "4px" }
-	}, /* @__PURE__ */ e.createElement(r, {
+	}, /* @__PURE__ */ v.createElement(t, {
 		size: "sm",
-		active: l,
-		title: _ ? `Paint over skin (${_})` : "Paint over skin",
-		onClick: () => L().getState().toggleArmed()
-	}, l ? "Done" : "Paint"), /* @__PURE__ */ e.createElement(r, {
+		active: u,
+		title: b,
+		onClick: () => F().getState().toggleArmed()
+	}, u ? "Done" : "Paint"), /* @__PURE__ */ v.createElement(t, {
 		size: "sm",
 		variant: "ghost",
-		disabled: !m,
-		onClick: () => void A()
-	}, "Clear"), /* @__PURE__ */ e.createElement("span", { style: {
-		...G,
-		marginLeft: "auto"
-	} }, m ? "Painted" : "Nothing painted")), !m && !l ? /* @__PURE__ */ e.createElement("span", { style: G }, "Paint over skin: the sliders act only where you paint.") : null, l ? /* @__PURE__ */ e.createElement(o, {
+		disabled: !h,
+		onClick: () => void k()
+	}, "Clear")), u ? /* @__PURE__ */ v.createElement("div", { title: ie }, /* @__PURE__ */ v.createElement(i, {
 		gap: 2,
 		style: {
 			padding: "6px",
 			borderRadius: "4px",
-			background: "var(--color-surface-2)"
+			background: a.surface2
 		}
-	}, K.map(y), /* @__PURE__ */ e.createElement(a, {
+	}, ae.map((t) => /* @__PURE__ */ v.createElement(e, {
+		key: t.key,
+		label: t.label,
+		value: Math.round(f[t.key] * 100),
+		min: t.min,
+		max: t.max,
+		step: 1,
+		defaultValue: Math.round(y.develop.brush.defaults[t.official] * 100),
+		onChange: (e) => {
+			F().getState().setBrush({ [t.key]: e / 100 }), F().getState().setBrushPreview(!0);
+		},
+		onCommit: () => F().getState().setBrushPreview(!1)
+	})), /* @__PURE__ */ v.createElement(r, {
 		gap: 12,
 		style: { marginTop: "4px" }
-	}, /* @__PURE__ */ e.createElement(i, {
-		checked: d.brushErase,
-		onChange: (e) => L().getState().setBrush({ brushErase: e }),
+	}, /* @__PURE__ */ v.createElement(n, {
+		checked: f.brushErase,
+		onChange: (e) => F().getState().setBrush({ brushErase: e }),
 		label: "Erase"
-	}), /* @__PURE__ */ e.createElement(i, {
-		checked: u,
-		onChange: (e) => L().getState().setShowMask(e),
+	}), /* @__PURE__ */ v.createElement(n, {
+		checked: d,
+		onChange: (e) => F().getState().setShowMask(e),
 		label: "Show mask"
-	})), /* @__PURE__ */ e.createElement("span", { style: G }, "Alt erase · [ ] size · ⇧[ ] feather · , . opacity · ⇧, ⇧. flow")) : null);
+	})))) : null);
 }
 //#endregion
 //#region src/model.ts
-var ce = 4096, le = .5, ue = 1e-4, de = {
+var se = 4096, U = .5, W = 1e-4, G = {
 	min: 1,
 	ratio: 20
-}, fe = {
+}, K = {
 	min: 4,
 	ratio: 16
-}, pe = .02, me = .1, J = (e) => Number.isInteger(e) ? `${e}.0` : String(e), Y = (e) => Array.from({ length: 6 }, (e, t) => t + 1).map((t) => `stbTap(p, dir, ${e * t} * stride)`), he = Array.from({ length: 6 }, (e, t) => {
+}, ce = .02, q = .1, J = (e) => Number.isInteger(e) ? `${e}.0` : String(e), Y = (e) => Array.from({ length: 6 }, (e, t) => t + 1).map((t) => `stbTap(p, dir, ${e * t} * stride)`), le = Array.from({ length: 6 }, (e, t) => {
 	let n = t + 1, [r, i] = [Y(1)[t], Y(-1)[t]];
 	return `    w = exp(-${J(n * n)} / (2.0 * t2));\n    acc += w * (${r} + ${i});\n    wsum += 2.0 * w;`;
 }).join("\n"), X = `
 ivec2 stbSize() { return ivec2(floor(1.0 / uTexel + 0.5)); }
 float stbAnchor() {
   vec2 res = 1.0 / uTexel;
-  return max(res.x, res.y) / ${J(ce)};
+  return max(res.x, res.y) / ${J(se)};
 }
-float stbSplitRef(float v) { return ${J(de.min)} * pow(${J(de.ratio)}, clamp(v, 0.0, 100.0) / 100.0); }
-float stbSmoothRef(float v) { return ${J(fe.min)} * pow(${J(fe.ratio)}, clamp(v, 0.0, 100.0) / 100.0); }
+float stbSplitRef(float v) { return ${J(G.min)} * pow(${J(G.ratio)}, clamp(v, 0.0, 100.0) / 100.0); }
+float stbSmoothRef(float v) { return ${J(K.min)} * pow(${J(K.ratio)}, clamp(v, 0.0, 100.0) / 100.0); }
 float stbSplitVariance(float size) {
   float a = stbAnchor();
   float s = stbSplitRef(size);
@@ -583,11 +445,11 @@ int stbPlan(float v2, out float t2) {
   float p = 1.0;
   for (int i = 0; i < 9; i++) {
     float q = p * 4.0;
-    if ((q - 1.0) / 3.0 + q * ${J(le)} > v2) break;
+    if ((q - 1.0) / 3.0 + q * ${J(U)} > v2) break;
     p = q;
     n++;
   }
-  t2 = clamp((v2 - (p - 1.0) / 3.0) / p, ${J(ue)}, ${J(3)});
+  t2 = clamp((v2 - (p - 1.0) / 3.0) / p, ${J(W)}, ${J(3)});
   return n;
 }
 ivec4 stbChainRegion(float v2) {
@@ -610,9 +472,9 @@ vec3 stbChainDraw(ivec2 p, vec3 own, float v2) {
   vec3 acc = own;
   float wsum = 1.0;
   float w;
-${he}
+${le}
   return acc / wsum;
-}`, ge = "c.rgb = stbChainDraw(ivec2(gl_FragCoord.xy), c.rgb, stbWideVariance(textureSize, smoothSize));", _e = "return stbChainRegion(stbWideVariance(textureSize, smoothSize));", ve = "c.rgb = stbChainDraw(ivec2(gl_FragCoord.xy), c.rgb, stbSplitVariance(textureSize));", ye = "return stbChainRegion(stbSplitVariance(textureSize));", be = "\n{\n  ivec2 p = ivec2(gl_FragCoord.xy);\n  ivec2 nb = max(stbSize() / 2, ivec2(1));\n  ivec2 b = min(p / 2, nb - 1) * 2;\n  vec3 e = 0.25 * (stbAt(b) + stbAt(b + ivec2(1, 0)) + stbAt(b + ivec2(0, 1)) + stbAt(b + ivec2(1, 1)));\n  int ch = p.x % 2 + 2 * (p.y % 2);\n  c = vec4(fetchInput(p), ch == 0 ? e.r : (ch == 1 ? e.g : e.b));\n}", xe = `
+}`, ue = "c.rgb = stbChainDraw(ivec2(gl_FragCoord.xy), c.rgb, stbWideVariance(textureSize, smoothSize));", de = "return stbChainRegion(stbWideVariance(textureSize, smoothSize));", fe = "c.rgb = stbChainDraw(ivec2(gl_FragCoord.xy), c.rgb, stbSplitVariance(textureSize));", pe = "return stbChainRegion(stbSplitVariance(textureSize));", me = "\n{\n  ivec2 p = ivec2(gl_FragCoord.xy);\n  ivec2 nb = max(stbSize() / 2, ivec2(1));\n  ivec2 b = min(p / 2, nb - 1) * 2;\n  vec3 e = 0.25 * (stbAt(b) + stbAt(b + ivec2(1, 0)) + stbAt(b + ivec2(0, 1)) + stbAt(b + ivec2(1, 1)));\n  int ch = p.x % 2 + 2 * (p.y % 2);\n  c = vec4(fetchInput(p), ch == 0 ? e.r : (ch == 1 ? e.g : e.b));\n}", he = `
 float stbPacked(ivec2 blk, int ch) {
   return fetchPrev4(clamp(blk * 2 + ivec2(ch % 2, ch / 2), ivec2(0), stbSize() - 1)).a;
 }
@@ -629,11 +491,11 @@ vec3 stbEven(highp ivec2 p) {
   return mix(top, bottom, fr.y);
 }
 float stbProtection(vec3 d, vec3 low) {
-  float ref = max((abs(low.r) + abs(low.g) + abs(low.b)) / 3.0, ${J(pe)});
-  float q = dot(d, d) / (3.0 * ref * ref * ${J(me * me)});
+  float ref = max((abs(low.r) + abs(low.g) + abs(low.b)) / 3.0, ${J(ce)});
+  float q = dot(d, d) / (3.0 * ref * ref * ${J(q * q)});
   return exp(-q * q);
-}`, Se = "\n{\n  ivec2 p = ivec2(gl_FragCoord.xy);\n  vec3 low = c.rgb;\n  vec3 d = stbEven(p) - low;\n  float s = clamp(smoothing, 0.0, 100.0) / 100.0;\n  float k = clamp(textureAmount, 0.0, 150.0) / 100.0;\n  c = vec4(s * stbProtection(d, low) * d + (k - 1.0) * (fetchInput(p) - low), 1.0);\n}", Ce = "\nif (maskOn > 0.5) {\n  float cov = mask(srcUv);\n  if (cov > 0.0) lin += cov * stageResult;\n}", Z = (e) => {
-	let t = g.find((t) => t.key === e);
+}`, ge = "\n{\n  ivec2 p = ivec2(gl_FragCoord.xy);\n  vec3 low = c.rgb;\n  vec3 d = stbEven(p) - low;\n  float s = clamp(smoothing, 0.0, 100.0) / 100.0;\n  float k = clamp(textureAmount, 0.0, 150.0) / 100.0;\n  c = vec4(s * stbProtection(d, low) * d + (k - 1.0) * (fetchInput(p) - low), 1.0);\n}", _e = "\nif (maskOn > 0.5) {\n  float cov = mask(srcUv);\n  if (cov > 0.0) lin += cov * stageResult;\n}", Z = (e) => {
+	let t = l.find((t) => t.key === e);
 	if (!t) throw Error(`no slider ${e}`);
 	return {
 		key: e,
@@ -646,98 +508,99 @@ float stbProtection(vec3 d, vec3 low) {
 		},
 		label: t.label
 	};
-}, we = {
-	key: b,
+}, ve = {
+	key: p,
 	glslType: "float",
 	default: 0,
 	label: "Painted"
 };
-function Te() {
+function ye() {
 	return {
-		id: p,
+		id: o,
 		name: "Skin Tone Brush",
 		phase: "decode",
 		priority: 900,
 		space: { encoding: "perceptual" },
 		reads: "current",
 		presetScope: "per-image",
-		dormantWhen: { [b]: 0 },
-		uniforms: [we],
+		dormantWhen: { [p]: 0 },
+		uniforms: [ve],
 		textures: [{
-			key: y,
+			key: f,
 			kind: "coverage"
 		}],
 		passes: [
 			{
-				glsl: ge,
+				glsl: ue,
 				helpers: X,
-				region: _e,
+				region: de,
 				iterations: 20,
 				channels: 4,
 				uniforms: [Z("textureSize"), Z("smoothSize")]
 			},
 			{
-				glsl: be,
+				glsl: me,
 				helpers: X,
 				channels: 4
 			},
 			{
-				glsl: ve,
+				glsl: fe,
 				helpers: X,
-				region: ye,
+				region: pe,
 				iterations: 20,
 				channels: 4,
 				keep: !0,
 				uniforms: [Z("textureSize")]
 			},
 			{
-				glsl: Se,
-				helpers: `${X}\n${xe}`,
+				glsl: ge,
+				helpers: `${X}\n${he}`,
 				channels: 4,
 				uniforms: [Z("smoothing"), Z("textureAmount")]
 			}
 		],
-		glsl: Ce
+		glsl: _e
 	};
 }
 //#endregion
 //#region src/index.tsx
 var Q = null, $ = null;
-function Ee(e) {
-	n(e), I(), Q = e, e.registerProcessingStage(Te()), $ = L().subscribe((t, n) => {
-		t.armed !== n.armed && e.develop.setCanvasTool(t.armed ? W : null);
+function be(e) {
+	b(e), P(), Q = e, e.registerProcessingStage(ye()), $ = F().subscribe((t, n) => {
+		t.armed !== n.armed && e.develop.setCanvasTool(t.armed ? re : null);
 	}), e.registerKeybinding({
-		id: h,
+		id: c,
 		label: "Paint skin smoothing",
 		category: "Develop",
 		defaultCombo: "Shift+K",
 		handler: () => {
-			a() && e.stores.useDevelopStore.getState().photoId && L().getState().toggleArmed();
+			e.navigation.current() === "develop" && e.stores.useDevelopStore.getState().photoId && F().getState().toggleArmed();
 		}
 	}), e.registerPanel({
-		id: m,
+		id: s,
 		title: "Skin Tone Brush",
-		component: q,
+		component: oe,
 		defaultDock: {
 			module: "develop",
 			direction: "right",
 			width: 250
 		},
-		onReset: () => void N()
+		modules: ["develop"],
+		onReset: () => void M()
 	});
 }
-function De() {
+function xe() {
 	let e = Q;
 	if (e) {
 		Q = null;
 		try {
-			L().getState().setArmed(!1), $?.(), $ = null, e.develop.setCanvasTool(null), e.unregisterProcessingStage(p);
+			F().getState().setArmed(!1), $?.(), $ = null, e.develop.setCanvasTool(null), e.unregisterProcessingStage(o);
 		} catch (e) {
 			console.warn("[skin-tone-brush] deactivate failed:", e);
 		}
 	}
 }
 //#endregion
-export { f as EXT_ID, m as PANEL_ID, Ee as activate, De as deactivate };
+export { a as EXT_ID, s as PANEL_ID, be as activate, xe as deactivate };
 
 //# sourceMappingURL=index.js.map
